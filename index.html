@@ -151,7 +151,7 @@
       invoke(decoded)
     } else {
       paused = true
-      ignore = false
+      setTimeout(function () { ignore = false }, 1000)
     }
   } else {
     ignore = false
