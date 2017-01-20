@@ -122,22 +122,14 @@
   session.setTabSize(2)
   session.setUseWorker(false)
 
-  session.on('input', function () {
-    if (changed) {
+  session.on('change', debounce(function () {
+    if (!ignore) {
       var val = session.getValue()
       var encoded = base64.encode(smaz.compress(val))
       window.location.hash = encoded
       invoke(val)
     }
-
-    changed = false
-  })
-
-  session.on('change', function () {
-    if (!ignore) {
-      changed = true
-    }
-  })
+  }, 1000))
 
   if (window.location.hash) {
     var encoded = window.location.hash.split('#')[1]
@@ -155,12 +147,14 @@
 
     if (confirmation) {
       paused = false
-      ignore = false
+      setTimeout(function () { ignore = false }, 1000)
       invoke(decoded)
     } else {
       paused = true
       ignore = true
     }
+  } else {
+    ignore = false
   }
   </script>
 </body>
