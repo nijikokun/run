@@ -1,379 +1,167 @@
 <html><head>
   <meta charset="utf-8">
-  <title>Run & Share JS Code</title>
-<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
-<style id="jsbin-css">
-* {
-  box-sizing: border-box;
-}
+  <title>Run &amp; Share JS Code</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-body, html {
-  margin: 0;
-  padding: 0;
-  background: #252525;
-  width: 100%;
-  height: 100%;
-}
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: #252525;
+      width: 100%;
+      height: 100%;
+    }
 
-textarea {
-  width: 50%;
-  float: left;
-  height: 100%;
-  border: none;
-  padding: 10px;
-  outline: none;
-  font-size: 14px;
-  font-family: monospace;
-}
+    textarea {
+      width: 50%;
+      float: left;
+      height: 100%;
+      border: none;
+      padding: 10px;
+      outline: none;
+      font-size: 14px;
+      font-family: monospace;
+    }
 
-fieldset {
-  margin: 0 !important;
-  padding: 0 !important;
-  float: right;
-  width: 50%;
-  height: 100%;
-  overflow: auto;
-  background: #252525;
-  border: 0px solid #252525;
-  color: white;
-  font-size: 12px !important;
-  font-family: Menlo, monospace;
-}
+    fieldset {
+      margin: 0 !important;
+      padding: 0 !important;
+      float: right;
+      width: 50%;
+      height: 100%;
+      overflow: auto;
+      background: #252525;
+      border: 0px solid #252525;
+      color: white;
+      font-size: 12px !important;
+      font-family: Menlo, monospace;
+    }
 
-fieldset span {
-  padding: 10px;
-  display: block;
-  border-bottom: 1px solid #333;
-}
+    fieldset span {
+      padding: 10px;
+      display: block;
+      border-bottom: 1px solid #333;
+      white-space: pre-wrap;
+    }
 
-fieldset span.type-ERROR {
-  background: red
-}
+    fieldset span.type-ERROR {
+      background: red
+    }
 
-legend { display: none; }
-</style>
+    .ace_editor {
+      width: 50%;
+      height: 100%;
+      float: left;
+      margin-top: 0;
+    }
+
+    legend { display: none; }
+  </style>
 </head>
 <body>
-  <textarea placeholder="Type your javascript code here, share the url, see the magic."></textarea>
-<script>
-(function (name, definition, context, dependencies) {
-  if (typeof context['module'] !== 'undefined' && context['module']['exports']) { if (dependencies && context['require']) { for (var i = 0; i < dependencies.length; i++) context[dependencies[i]] = context['require'](dependencies[i]); } context['module']['exports'] = definition.apply(context); }
-  else if (typeof context['define'] !== 'undefined' && context['define'] === 'function' && context['define']['amd']) { define(name, (dependencies || []), definition); }
-  else { context[name] = definition.apply(context); }
-})('utf8', function () {
-  return {
-    encode: function (string) {
-      if (typeof string !== 'string') return string;
-      else string = string.replace(/\r\n/g, "\n");
-      var output = "", i = 0, charCode;
+  <textarea id="editor"></textarea>
 
-      for (i; i < string.length; i++) {
-        charCode = string.charCodeAt(i);
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js' type="text/javascript"></script>
+  <script src="console.js"></script>
+  <script src="base64.js"></script>
+  <script src="smaz.js"></script>
 
-        if (charCode < 128)
-          output += String.fromCharCode(charCode);
-        else if ((charCode > 127) && (charCode < 2048))
-          output += String.fromCharCode((charCode >> 6) | 192),
-          output += String.fromCharCode((charCode & 63) | 128);
-        else
-          output += String.fromCharCode((charCode >> 12) | 224),
-          output += String.fromCharCode(((charCode >> 6) & 63) | 128),
-          output += String.fromCharCode((charCode & 63) | 128);
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/babel-polyfill@6/dist/polyfill.min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript"></script>
+  <script>
+  var paused = false
+  var $ = jQuery
+  var SECURITY_RISK_KEYWORDS = ['fetch','xhr','while','eval','\\\\x','alert','fromCharCode','&#','\\\\0','msgbox','Set.constructor','localStorage','document.cookie','setInterval']
+
+  function safeEval(b){return new Promise(function(c,a){a=void 0;try{a=eval(b),setTimeout(function(){},1E4)}catch(d){a=d}c(a)})};
+  function debounce(b,f,c){var a;return function(){var d=this,e=arguments,g=c&&!a;clearTimeout(a);a=setTimeout(function(){a=null;c||b.apply(d,e)},f);g&&b.apply(d,e)}};
+
+  function invoke (code) {
+    if (!code) return
+
+    if (paused) {
+      paused = !confirm('Script execution was paused from previous request, re-enable?')
+    }
+
+    if (!paused) {
+      var compiled
+
+      try {
+        safeEval(Babel.transform(code, { presets: ['es2015','react','stage-2'] }).code).then(function (result) {
+          console.log(result)
+        }).catch(error => {
+          console.log(error)
+        })
+      } catch (e) {
+        console.error(e)
       }
-
-      return output;
-    },
-
-    decode: function (string) {
-      if (typeof string !== 'string') return string;
-      var output = "", i = 0, charCode = 0;
-
-      while (i < string.length) {
-        charCode = string.charCodeAt(i);
-
-        if (charCode < 128)
-          output += String.fromCharCode(charCode),
-          i++;
-        else if ((charCode > 191) && (charCode < 224))
-          output += String.fromCharCode(((charCode & 31) << 6) | (string.charCodeAt(i + 1) & 63)),
-          i += 2;
-        else
-          output += String.fromCharCode(((charCode & 15) << 12) | ((string.charCodeAt(i + 1) & 63) << 6) | (string.charCodeAt(i + 2) & 63)),
-          i += 3;
-      }
-
-      return output;
-    }
-  };
-}, this);
-
-// Base64 Module
-//
-// Cleaner, modularized and properly scoped base64 encoding and decoding module for strings.
-//
-// copyright: MIT
-// author: Nijiko Yonskai, @nijikokun, nijikokun@gmail.com
-(function (name, definition, context, dependencies) {
-  if (typeof context['module'] !== 'undefined' && context['module']['exports']) { if (dependencies && context['require']) { for (var i = 0; i < dependencies.length; i++) context[dependencies[i]] = context['require'](dependencies[i]); } context['module']['exports'] = definition.apply(context); }
-  else if (typeof context['define'] !== 'undefined' && context['define'] === 'function' && context['define']['amd']) { define(name, (dependencies || []), definition); }
-  else { context[name] = definition(); }
-})('base64', function (utf8) {
-  var $this = this;
-  var $utf8 = utf8 || this.utf8;
-  var map = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-  return {
-    encode: function (input) {
-      if (typeof $utf8 === 'undefined') throw { error: "MissingMethod", message: "UTF8 Module is missing." };
-      if (typeof input !== 'string') return input;
-      else input = $utf8.encode(input);
-      var output = "", a, b, c, d, e, f, g, i = 0;
-
-      while (i < input.length) {
-        a = input.charCodeAt(i++);
-        b = input.charCodeAt(i++);
-        c = input.charCodeAt(i++);
-        d = a >> 2;
-        e = ((a & 3) << 4) | (b >> 4);
-        f = ((b & 15) << 2) | (c >> 6);
-        g = c & 63;
-
-        if (isNaN(b)) f = g = 64;
-        else if (isNaN(c)) g = 64;
-
-        output += map.charAt(d) + map.charAt(e) + map.charAt(f) + map.charAt(g);
-      }
-
-      return output;
-    },
-
-    decode: function (input) {
-      if (typeof $utf8 === 'undefined') throw { error: "MissingMethod", message: "UTF8 Module is missing." };
-      if (typeof input !== 'string') return input;
-      else input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-      var output = "", a, b, c, d, e, f, g, i = 0;
-
-      while (i < input.length) {
-        d = map.indexOf(input.charAt(i++));
-        e = map.indexOf(input.charAt(i++));
-        f = map.indexOf(input.charAt(i++));
-        g = map.indexOf(input.charAt(i++));
-
-        a = (d << 2) | (e >> 4);
-        b = ((e & 15) << 4) | (f >> 2);
-        c = ((f & 3) << 6) | g;
-
-        output += String.fromCharCode(a);
-        if (f != 64) output += String.fromCharCode(b);
-        if (g != 64) output += String.fromCharCode(c);
-      }
-
-      return $utf8.decode(output);
     }
   }
-}, this, [ "utf8" ]);
 
+  var editor = ace.edit('editor')
+  var session = editor.getSession()
+  var textarea = $('textarea')
+  var changed
+  var ignore
 
-function safeEval(untrustedCode) {
-    return new Promise(function (resolve, reject) {
-        var resolved = false
-        var result = undefined
-        
-        try {
-          var result = eval(untrustedCode)
-          
-          setTimeout(function () {
-            if (typeof result === undefined) {
-              reject(new Error('Unable to evaluate script.'))
-            }
-          }, 10000)
-        } catch (e) {
-          result = e
-        }
-
-        if (typeof result !== undefined) {
-          resolve(result)
-        }
-    });
-}
-
-(function initConsoleLogDiv() {
-  'use strict';
-
-
-  if (console.log.toDiv) {
-    return;
-  }
-
-  function toString(x) {
-    if (x instanceof Error) {
-      return x.message;
-    }
-    return typeof x === 'string' ? x : JSON.stringify(x);
-  }
-
-  var log = console.log.bind(console);
-  var error = console.error.bind(console);
-  var warn = console.warn.bind(console);
-  var table = console.table ? console.table.bind(console) : null;
-  var id = 'console-log-div';
-
-  function createOuterElement() {
-    var outer = document.getElementById(id);
-    if (!outer) {
-      outer = document.createElement('fieldset');
-      outer.id = id;
-      document.body.appendChild(outer);
-    }
-    outer.classList.add(id);
-
-    var style = outer.style;
-    style.fontFamily = 'monospace';
-    style.whiteSpace = 'pre';
-    return outer;
-  }
-
-  var logTo = (function createLogDiv() {
-
-    var outer = createOuterElement();
-
-    var caption = document.createTextNode('console output');
-    var legend = document.createElement('legend');
-    legend.appendChild(caption);
-    outer.appendChild(legend);
-
-    var div = document.createElement('div');
-    div.id = 'console-log-text';
-    outer.appendChild(div);
-
-    return div;
-  }());
-
-  function printToDiv() {
-    var args = Array.prototype.slice.call(arguments, 0)
-    var type = args.shift()
-    
-    var msg = args
-      .map(toString)
-      .join(' ')
-  
-    var html = logTo.innerHTML
- 
-    logTo.innerHTML = html + '<span class="type-' + type + '">' + msg + '</span>'
-  }
-
-  function logWithCopy() {
-    log.apply(null, arguments);
-    var args = Array.prototype.slice.call(arguments, 0);
-    args.unshift('INFO');
-    printToDiv.apply(null, args);
-  }
-
-  console.log = logWithCopy;
-  console.log.toDiv = true;
-
-  console.error = function errorWithCopy() {
-    error.apply(null, arguments);
-    var args = Array.prototype.slice.call(arguments, 0);
-    args.unshift('ERROR');
-    printToDiv.apply(null, args);
-  };
-
-  console.warn = function logWarning() {
-    warn.apply(null, arguments);
-    var args = Array.prototype.slice.call(arguments, 0);
-    args.unshift('WARNING');
-    printToDiv.apply(null, args);
-  };
-
-  function printTable(objArr, keys) {
-
-    var numCols = keys.length;
-    var len = objArr.length;
-    var $table = document.createElement('table');
-    $table.style.width = '100%';
-    $table.setAttribute('border', '1');
-    var $head = document.createElement('thead');
-    var $tdata = document.createElement('td');
-    $tdata.innerHTML = 'Index';
-    $head.appendChild($tdata);
-
-    for (var k = 0; k < numCols; k++) {
-      $tdata = document.createElement('td');
-      $tdata.innerHTML = keys[k];
-      $head.appendChild($tdata);
-    }
-    $table.appendChild($head);
-
-    for (var i = 0; i < len; i++) {
-      var $line = document.createElement('tr');
-      $tdata = document.createElement('td');
-      $tdata.innerHTML = i;
-      $line.appendChild($tdata);
-
-      for (var j = 0; j < numCols; j++) {
-        $tdata = document.createElement('td');
-        $tdata.innerHTML = objArr[i][keys[j]];
-        $line.appendChild($tdata);
-      }
-      $table.appendChild($line);
-    }
-    var div = document.getElementById('console-log-text');
-    div.appendChild($table);
-  }
-
-  console.table = function logTable() {
-    if (typeof table === 'function') {
-      table.apply(null, arguments);
-    }
-
-    var objArr = arguments[0];
-    var keys;
-
-    if (typeof objArr[0] !== 'undefined') {
-      keys = Object.keys(objArr[0]);
-    }
-    printTable(objArr, keys);
-  };
-
-  window.addEventListener('error', function (err) {
-    printToDiv('EXCEPTION', err.message + '\n  ' + err.filename, err.lineno + ':' + err.colno);
-  });
-
-}());
-
-function debounce(func, wait, immediate) {
-	var timeout;
-	return function() {
-		var context = this, args = arguments;
-		var later = function() {
-			timeout = null;
-			if (!immediate) func.apply(context, args);
-		};
-		var callNow = immediate && !timeout;
-		clearTimeout(timeout);
-		timeout = setTimeout(later, wait);
-		if (callNow) func.apply(context, args);
-	};
-}
-
-function invoke (code) {
-  safeEval(code).then(function (result) {
-    console.log(result)
-  }).catch(error => {
-    console.log(error)
+  textarea.css({
+    fontFamily: '"Operator Mono", "Fira Code", "Ubuntu Mono", "Droid Sans Mono", "Liberation Mono", "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace',
+    lineHeight: 'inherit'
   })
-}
 
-$('textarea').on('keyup', debounce(function () {
-  var val = $(this).val()
-  window.location.hash = base64.encode(val)
-  invoke(val)
-}, 1000))
+  editor.setTheme('ace/theme/tomorrow')
+  editor.setShowPrintMargin(false)
+  editor.commands.removeCommands(['gotoline', 'find'])
+  editor.$blockScrolling = Infinity
 
-if (window.location.hash) {
-  var val = window.location.hash.split('#')[1]
-  $('textarea').val(base64.decode(val))
-  invoke($('textarea').val())
-}
-</script></body></html>
+  session.setMode('ace/mode/javascript')
+  session.setUseSoftTabs(true)
+  session.setTabSize(2)
+  session.setUseWorker(false)
+
+  session.on('input', function () {
+    if (changed) {
+      var val = session.getValue()
+      var encoded = base64.encode(smaz.compress(val))
+      window.location.hash = encoded
+      invoke(val)
+    }
+
+    changed = false
+  })
+
+  session.on('change', function () {
+    if (!ignore) {
+      changed = true
+    }
+  })
+
+  if (window.location.hash) {
+    var encoded = window.location.hash.split('#')[1]
+    var decoded = smaz.decompress(base64.decode(encoded))
+    var confirmation = false
+
+    ignore = true
+    session.setValue(decoded)
+
+    if (new RegExp(SECURITY_RISK_KEYWORDS.join("|"), 'i').test(decoded)) {
+      confirmation = confirm('It appears this code may contain malicious content, execute anyway?')
+    } else {
+      confirmation = true
+    }
+
+    if (confirmation) {
+      paused = false
+      ignore = false
+      invoke(decoded)
+    } else {
+      paused = true
+      ignore = true
+    }
+  }
+  </script>
+</body>
+</html>
