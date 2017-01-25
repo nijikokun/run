@@ -44,6 +44,7 @@
       display: block;
       border-bottom: 1px solid #333;
       white-space: pre-wrap;
+      word-break: break-all;
     }
 
     fieldset span.type-ERROR {
@@ -147,11 +148,11 @@
 
     if (confirmation) {
       paused = false
-      setTimeout(function () { ignore = false }, 1000)
+      setTimeout(function () { ignore = false }, 1300)
       invoke(decoded)
     } else {
       paused = true
-      setTimeout(function () { ignore = false }, 1000)
+      setTimeout(function () { ignore = false }, 1300)
     }
   } else {
     ignore = false
