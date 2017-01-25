@@ -50,11 +50,13 @@
   function printToDiv () {
     var args = Array.prototype.slice.call(arguments, 0)
     var type = args.shift()
-    var html = logTo.innerHTML
-    var msg = args
+    var msg = $.trim(args
       .map(toString)
-      .join(' ')
+      .join(' '))
 
+    if (!msg.length) return
+
+    var html = logTo.innerHTML
     logTo.innerHTML = html + '<span class="type-' + type + '">' + msg + '</span>'
   }
 
