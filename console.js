@@ -8,6 +8,7 @@
     return typeof x === 'string' ? x : JSON.stringify(x)
   }
 
+  var start = Date.now()
   var log = console.log.bind(console)
   var error = console.error.bind(console)
   var warn = console.warn.bind(console)
@@ -57,8 +58,11 @@
 
     if (!msg.length) return
 
-    var html = logTo.innerHTML
-    logTo.innerHTML = html + '<span class="type-' + type + '">' + msg + '</span>'
+    logTo.innerHTML = logTo.innerHTML + '<span class="type-' + type + '">' + msg + '</span>'
+    logTo.innerHTML = logTo.innerHTML + '<span class="type-DEBUG">Took ' + (Date.now() - start) / 1000 + 'ms</span>'
+
+    start = Date.now()
+    $('fieldset').scrollTop($('fieldset').outerHeight())
   }
 
   function logWithCopy () {

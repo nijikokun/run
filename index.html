@@ -100,8 +100,6 @@
       try {
         safeEval(Babel.transform(code, { presets: ['es2015','react','stage-2'] }).code).then(function (result) {
           console.log(result)
-          console.debug('Took ' + (Date.now() - start) / 1000 + 'ms\n')
-          $('fieldset').scrollTop($('fieldset').outerHeight())
         }).catch(error => {
           console.log(error)
         })
@@ -111,7 +109,6 @@
     }
   }
 
-  var start = Date.now()
   var editor = ace.edit('editor')
   var session = editor.getSession()
   var textarea = $('textarea')
