@@ -11,6 +11,7 @@
   var log = console.log.bind(console)
   var error = console.error.bind(console)
   var warn = console.warn.bind(console)
+  var debug = console.debug.bind(console)
   var table = console.table ? console.table.bind(console) : null
   var id = 'console-log-div'
 
@@ -69,6 +70,13 @@
 
   console.log = logWithCopy
   console.log.toDiv = true
+
+  console.debug = function debugWithCopy () {
+    error.apply(null, arguments)
+    var args = Array.prototype.slice.call(arguments, 0)
+    args.unshift('DEBUG')
+    printToDiv.apply(null, args)
+  }
 
   console.error = function errorWithCopy () {
     error.apply(null, arguments)

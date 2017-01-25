@@ -42,7 +42,7 @@
     fieldset span {
       padding: 10px;
       display: block;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #303030;
       white-space: pre-wrap;
       word-break: break-all;
       font-family: Monaco, Menlo, monospace;
@@ -50,6 +50,11 @@
 
     fieldset span.type-ERROR {
       background: hsl(353, 100%, 34%)
+    }
+
+
+    fieldset span.type-DEBUG {
+      color: #666
     }
 
     .ace_editor, textarea {
@@ -95,6 +100,8 @@
       try {
         safeEval(Babel.transform(code, { presets: ['es2015','react','stage-2'] }).code).then(function (result) {
           console.log(result)
+          console.debug('Took ' + (Date.now() - start) / 1000 + 'ms\n')
+          $('fieldset').scrollTop($('fieldset').outerHeight())
         }).catch(error => {
           console.log(error)
         })
@@ -104,6 +111,7 @@
     }
   }
 
+  var start = Date.now()
   var editor = ace.edit('editor')
   var session = editor.getSession()
   var textarea = $('textarea')
