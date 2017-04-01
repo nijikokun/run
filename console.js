@@ -61,7 +61,7 @@
     logTo.innerHTML = logTo.innerHTML + '<span class="type-DEBUG">Took ' + (Date.now() - window._run_start) / 1000 + 'ms</span>'
 
     window._run_start = Date.now()
-    $('fieldset').scrollTop($('fieldset').scrollHeight)
+    $('fieldset').scrollTop($('#console-log-text')[0].scrollHeight)
   }
 
   function logWithCopy () {
